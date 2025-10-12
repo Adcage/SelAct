@@ -14,7 +14,8 @@
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "node -e \"console.log('Skipping electron-builder install-app-deps to avoid rebuilding selection-hook')\"",
+    "rebuild:electron": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
@@ -26,6 +27,7 @@
     "ant-design-vue": "^4.2.6",
     "diff-match-patch": "^1.0.5",
     "electron-updater": "^6.3.9",
+    "electron-window-state": "^5.0.3",
     "highlight.js": "^11.11.1",
     "selection-hook": "^1.0.12",
     "vue-router": "^4.5.1"
