@@ -1,5 +1,10 @@
 import { BrowserWindow } from 'electron'
-import { MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH } from '@share/config/constant'
+import {
+  DEFAULT_MINIWINDOW_HEIGHT,
+  DEFAULT_MINIWINDOW_WIDTH,
+  MIN_WINDOW_HEIGHT,
+  MIN_WINDOW_WIDTH
+} from '@share/config/constant'
 import windowStateKeeper from 'electron-window-state'
 import { isLinux, isMac } from '../constant'
 import { titleBarOverlayDark, titleBarOverlayLight } from '@main/config'
@@ -90,7 +95,7 @@ export class WindowService {
    * @param mainWindowState
    * @private
    */
-  private setupMainWindow(mainWindow: BrowserWindow, mainWindowState) {
+  private setupMainWindow(mainWindow: BrowserWindow, mainWindowState: ReturnType<typeof windowStateKeeper>): void {
     mainWindowState.manage(mainWindow)
     // 后续添加更多加载逻辑
   }
@@ -102,11 +107,47 @@ export class WindowService {
     if (this.miniWindow && !this.miniWindow.isDestroyed()) {
       return this.miniWindow
     }
+    const miniWindowState = windowStateKeeper({
+      defaultWidth: DEFAULT_MINIWINDOW_WIDTH,
+      defaultHeight: DEFAULT_MINIWINDOW_HEIGHT,
+      file: 'miniWindow-state.json'
+    })
     this.miniWindow = new BrowserWindow({
-      width: 300,
-      //TODO 完善内容
+      x: miniWindowState.x,
+      y: miniWindowState.y,
+      width: miniWindowState.width,
+      height: miniWindowState.height,
+      minWidth: 350,
+      minHeight: 380,
+      maxHeight: 768,
+      maxWidth: 1024,
+      show: false,
+      autoHideMenuBar: true,
+      transparent: isMac,
+      vibrancy: 'under-window',
+      visualEffectState: 'followWindow',
+      frame: false,
+      alwaysOnTop: true,
+      useContentSize: true,
+      ...(isMac ? { type: 'panel' } : {}),
+      skipTaskbar: true,
+      resizable: true,
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      webPreferences: {
+        preload: join(__dirname, '../preload/index.js'),
+        sandbox: false,
+        webSecurity: false,
+        webviewTag: true
+      }
     })
 
-    return this.miniWindow;
+    miniWindowState.manage(this.miniWindow)
+
+    this.miniWindow?.setAlwaysOnTop(true, 'floating')
+    //TODO
+
+    return this.miniWindow
   }
 }
